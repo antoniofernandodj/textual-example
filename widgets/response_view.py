@@ -3,9 +3,7 @@ from contextlib import suppress
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import Static, TextArea, TabbedContent, TabPane
-
 from services.request import parse_body, parse_headers, select_status_color
-
 
 
 class ResponseView(Static):
