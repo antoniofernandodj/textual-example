@@ -1,6 +1,5 @@
 # widgets/response_view.py
 from contextlib import suppress
-import json
 from textual.app import ComposeResult
 from textual.reactive import reactive
 from textual.widgets import Static, TextArea, TabbedContent, TabPane
