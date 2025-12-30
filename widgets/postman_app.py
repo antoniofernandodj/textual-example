@@ -1,5 +1,5 @@
 # widgets/postman_app.py
-from typing import Any, cast
+from typing import cast
 import httpx
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, Button, ListView, TextArea, TabbedContent, TabPane
