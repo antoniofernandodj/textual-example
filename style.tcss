@@ -1,0 +1,41 @@
+Screen {
+    layout: horizontal;
+}
+
+#sidebar {
+    width: 30;
+    border-right: solid $primary;
+}
+
+#main {
+    width: 1fr;
+    height: 100%;
+}
+
+TabbedContent, TabPane, #main_tabs {
+    height: 1fr;
+}
+
+TextArea {
+    height: 1fr;
+    min-height: 10;
+    border: solid $accent;
+    margin: 1;
+}
+
+.request-line {
+    height: 3;
+    margin-bottom: 1;
+}
+
+.url-input {
+    width: 1fr;
+}
+
+.method-select {
+    width: 15;
+}
+
+#response_body, #response_headers {
+    background: $surface;
+}
