@@ -1,6 +1,7 @@
 # widgets/postman_app.py
 from typing import cast
 import httpx
+from textual import on
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, Button, ListView, TextArea, TabbedContent, TabPane
 from textual.containers import Horizontal, Vertical
@@ -25,32 +26,33 @@ class PostmanApp(App):
         url_widget.focus()
 
     def compose(self) -> ComposeResult:
-            yield Header()
-            with Horizontal():
-                with Vertical(id="sidebar"):
-                    self.history = RequestHistory()
-                    yield self.history
+        yield Header()
+        with Horizontal():
+            with Vertical(id="sidebar"):
+                self.history = RequestHistory()
+                yield self.history
 
-                with Vertical(id="main"):
-                    with TabbedContent(id="main_tabs"):
-                        with TabPane("REQUEST", id="pane_request"):
-                            self.editor = RequestEditor()
-                            yield self.editor
-                        with TabPane("RESPONSE", id="pane_response"):
-                            self.response_view = ResponseView()
-                            yield self.response_view
-            yield Footer()
+            with Vertical(id="main"):
+                with TabbedContent(id="main_tabs"):
+                    with TabPane("REQUEST", id="pane_request"):
+                        self.editor = RequestEditor()
+                        yield self.editor
+                    with TabPane("RESPONSE", id="pane_response"):
+                        self.response_view = ResponseView()
+                        yield self.response_view
+        yield Footer()
 
-    async def on_button_pressed(self, event: Button.Pressed):
+    @on(Button.Pressed, '#send')
+    async def button_pressed(self, event: Button.Pressed):
         try:
-            if event.button.id == "send":
-                await self.action_send_request()
+            await self.__action_send_request()
         except Exception as e:
-            self.handle_exception(e)
+            self.__handle_exception(e)
 
-    async def on_list_view_selected(self, event: ListView.Selected):
+    @on(ListView.Selected)
+    async def list_view_selected(self, event: ListView.Selected):
         history_item = cast(HistoryItemWidget, event.item)
-        self.set_response_data(
+        self.__set_response_data(
             status=history_item.status,
             status_text=history_item.response.reason_phrase,
             headers=dict(history_item.response.headers),
@@ -59,18 +61,18 @@ class PostmanApp(App):
         )
 
 
-    async def action_send_request(self):
+    async def __action_send_request(self):
         body_text_widget = self.editor.query_one("#request_body", TextArea)
         headers_text_widget = self.editor.query_one("#request_headers", TextArea)
 
         response, elapsed = await make_request(
-            url=str(self.editor.url),
-            method=str(self.editor.method),
+            url=self.editor.url,
+            method=self.editor.method,
             body_text=body_text_widget.text,
             headers_text=headers_text_widget.text
         )
 
-        self.set_response_data(
+        self.__set_response_data(
             status=response.status_code,
             status_text=response.reason_phrase,
             headers=dict(response.headers),
@@ -96,8 +98,7 @@ class PostmanApp(App):
         main_tabs = self.query_one("#main_tabs", TabbedContent)
         main_tabs.active = "pane_response"
 
-
-    def handle_exception(self, error: Exception) -> None:
+    def __handle_exception(self, error: Exception) -> None:
         traceback_obj = error.__traceback__
         if isinstance(error, RequestError):
             self.notify(error.message, severity="error")
@@ -120,7 +121,7 @@ class PostmanApp(App):
             f.write("".join(traceback.format_tb(traceback_obj)))
             f.write(f"{error}\n\n")
 
-    def set_response_data(self, status, time_ms, status_text, headers, body):
+    def __set_response_data(self, status, time_ms, status_text, headers, body):
         self.response_view.status = status
         self.response_view.time_ms = time_ms
         self.response_view.status_text = status_text

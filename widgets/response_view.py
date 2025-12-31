@@ -1,17 +1,17 @@
 # widgets/response_view.py
 from contextlib import suppress
 from textual.app import ComposeResult
-from textual.reactive import reactive
+from textual.reactive import reactive as ref
 from textual.widgets import Static, TextArea, TabbedContent, TabPane
 from services.request import parse_body, parse_headers, select_status_color
 
 
 class ResponseView(Static):
-    status = reactive(0)
-    status_text = reactive("")
-    headers = reactive({})
-    body = reactive("")
-    time_ms = reactive(0.0)
+    status = ref(0)
+    status_text = ref("")
+    headers = ref({})
+    body = ref("")
+    time_ms = ref(0.0)
 
     def compose(self) -> ComposeResult:
         with TabbedContent():

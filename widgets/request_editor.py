@@ -1,7 +1,9 @@
 # widgets/request_editor.py
+from typing import Optional
+from textual import on
 from textual.containers import Horizontal
 from textual.app import ComposeResult
-from textual.reactive import reactive
+from textual.reactive import reactive as ref
 from textual.containers import Container, Horizontal
 from textual.widgets import (
     Button, Input, Select,
@@ -14,25 +16,22 @@ METHODS = ('GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS')
 
 class RequestEditor(Container):
 
-    def __init__(self):
-        super().__init__()
-        self.method = reactive("POST")
-        self.url = reactive("https://httpbin.org/post")
-        self.headers_text = reactive("")
-        self.body_text = reactive("")
-
+    method = ref[str]("POST")
+    url = ref[str]("https://httpbin.org/post")
+    headers_text = ref[Optional[str]](None)
+    body_text = ref[Optional[str]](None)
 
     def compose(self) -> ComposeResult:
         with Horizontal(classes="request-line"):
             yield Select(
-                options=[(i, i) for i in METHODS],
-                value="POST",
                 id="method",
+                value="POST",
+                options=[(i, i) for i in METHODS],
                 classes="method-select"
             )
             yield Input(
-                placeholder="https://httpbin.org/post",
                 id="url",
+                placeholder="https://httpbin.org/post",
                 classes="url-input",
                 value="https://httpbin.org/post"
             )
@@ -44,17 +43,18 @@ class RequestEditor(Container):
             with TabPane("Headers"):
                 yield TextArea(id="request_headers", language="json")
 
-    def on_select_changed(self, event: Select.Changed):
-        if event.select.id == "method":
-            self.method = event.value
+    @on(Select.Changed, "#method")
+    def select_changed(self, event: Select.Changed):
+        self.method = str(event.value)
 
-    def on_input_changed(self, event: Input.Changed):
-        if event.input.id == "url":
-            self.url = event.value
+    @on(Input.Changed, "#url")
+    def input_changed(self, event: Input.Changed):
+        self.url = event.value
 
-    def on_text_area_changed(self, event: TextArea.Changed):
-        if event.text_area.id == "request_body":
-            self.body_text = event.text_area.text
+    @on(TextArea.Changed, "#request_body")
+    def text_area_body_changed(self, event: TextArea.Changed):
+        self.body_text = event.text_area.text
 
-        elif event.text_area.id == "request_headers":
-            self.headers_text = event.text_area.text
+    @on(TextArea.Changed, "#request_headers")
+    def text_area_headers_changed(self, event: TextArea.Changed):
+        self.headers_text = event.text_area.text
