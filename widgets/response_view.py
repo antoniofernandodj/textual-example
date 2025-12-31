@@ -23,10 +23,6 @@ class ResponseView(Static):
     def __init__(self, h: RequestHistory):
         super().__init__()
         self.request_history = h
-        self.response_to_delete = None
-
-    def select_response_to_delete(self, r: Response):
-        self.response_to_delete = r
 
     def compose(self) -> ComposeResult:
         with TabbedContent():

@@ -56,7 +56,6 @@ class PostmanApp(App):
     @on(ListView.Selected)
     async def list_view_selected(self, event: ListView.Selected):
         history_item = cast(HistoryItemWidget, event.item)
-        self.response_view.select_response_to_delete(history_item.response)
         self.__set_response_data(
             status=history_item.status,
             status_text=history_item.response.reason_phrase,
