@@ -1,12 +1,17 @@
 # widgets/request_history.py
+from contextlib import suppress
 from datetime import datetime
 import os
 import pickle
-from typing import List
+from typing import List, Optional, cast
 from httpx import Response
+from services.logging import setup_logging
 from widgets.history_item import HistoryItemWidget
 from textual.app import ComposeResult
 from textual.widgets import Static, ListView, Label
+
+
+logger = setup_logging(__name__)
 
 
 class HistoryItem:
@@ -60,3 +65,22 @@ class RequestHistory(Static):
             list_view.append(item)
 
         del history_items
+
+    def remove_response(self) -> None:
+        list_view = cast(ListView, self.query_one("#history_list", ListView))
+        if list_view.index is None:
+            return 
+
+        with suppress(Exception):
+            history_item = cast(HistoryItemWidget, list_view.children[list_view.index])
+            timestamp = history_item.timestamp.replace(":", "_")
+
+            history_item.remove()
+            del history_item.response
+            del history_item
+
+            # Remover arquivo persistido
+            file_path = f"./history/{timestamp}.bin"
+
+            if os.path.exists(file_path):
+                os.remove(file_path)

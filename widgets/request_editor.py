@@ -1,6 +1,7 @@
 # widgets/request_editor.py
 from typing import Optional
 from textual import on
+from services.logging import setup_logging
 from textual.containers import Horizontal
 from textual.app import ComposeResult
 from textual.reactive import reactive as ref
@@ -11,6 +12,7 @@ from textual.widgets import (
 )
 
 
+logger = setup_logging(__name__)
 METHODS = ('GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS')
 
 

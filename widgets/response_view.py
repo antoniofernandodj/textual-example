@@ -1,9 +1,16 @@
 # widgets/response_view.py
 from contextlib import suppress
+from httpx import Response
+from textual import on
 from textual.app import ComposeResult
 from textual.reactive import reactive as ref
-from textual.widgets import Static, TextArea, TabbedContent, TabPane
+from textual.widgets import Static, TextArea, TabbedContent, TabPane, Button, Label
+from services.logging import setup_logging
 from services.request import parse_body, parse_headers, select_status_color
+from widgets.request_history import RequestHistory
+
+
+logger = setup_logging(__name__)
 
 
 class ResponseView(Static):
@@ -12,6 +19,14 @@ class ResponseView(Static):
     headers = ref({})
     body = ref("")
     time_ms = ref(0.0)
+
+    def __init__(self, h: RequestHistory):
+        super().__init__()
+        self.request_history = h
+        self.response_to_delete = None
+
+    def select_response_to_delete(self, r: Response):
+        self.response_to_delete = r
 
     def compose(self) -> ComposeResult:
         with TabbedContent():
@@ -23,6 +38,14 @@ class ResponseView(Static):
             
             with TabPane("Info", id="info_tab"):
                 yield Static(id="response_info")
+
+            with TabPane("Delete", id="delete_tab"):
+                yield Label('Tem Certeza que deseja remover esta response?', classes='delete_confirm')
+                yield Button('Remove', id="delete_button")
+
+    @on(Button.Pressed, '#delete_button')
+    def delete_response(self, event: Button.Pressed):
+        self.request_history.remove_response()
 
     def watch_status(self, status: int):
         self._update_display()

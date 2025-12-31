@@ -39,3 +39,7 @@ TextArea {
 #response_body, #response_headers {
     background: $surface;
 }
+
+#delete_button {
+    background: red;
+}

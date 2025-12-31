@@ -2,6 +2,10 @@
 from httpx import Response
 from textual.app import ComposeResult
 from textual.widgets import Static, ListItem
+from services.logging import setup_logging
+
+
+logger = setup_logging(__name__)
 
 
 class HistoryItemWidget(ListItem):

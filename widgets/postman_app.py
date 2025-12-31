@@ -6,11 +6,15 @@ from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer, Button, ListView, TextArea, TabbedContent, TabPane
 from textual.containers import Horizontal, Vertical
 from textual.binding import Binding
+from services.logging import setup_logging
 from services.request import RequestError, make_request
 from widgets.history_item import HistoryItemWidget
 from widgets.request_editor import RequestEditor
 from widgets.request_history import RequestHistory
 from widgets.response_view import ResponseView
+
+
+logger = setup_logging(__name__)
 
 
 class PostmanApp(App):
@@ -38,7 +42,7 @@ class PostmanApp(App):
                         self.editor = RequestEditor()
                         yield self.editor
                     with TabPane("RESPONSE", id="pane_response"):
-                        self.response_view = ResponseView()
+                        self.response_view = ResponseView(self.history)
                         yield self.response_view
         yield Footer()
 
@@ -52,6 +56,7 @@ class PostmanApp(App):
     @on(ListView.Selected)
     async def list_view_selected(self, event: ListView.Selected):
         history_item = cast(HistoryItemWidget, event.item)
+        self.response_view.select_response_to_delete(history_item.response)
         self.__set_response_data(
             status=history_item.status,
             status_text=history_item.response.reason_phrase,
